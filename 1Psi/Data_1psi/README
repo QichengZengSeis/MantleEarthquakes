@@ -1,0 +1,8 @@
+USArr_1psi_0.txt
+# Anisotropy Compilation
+Longitude Latitude IsotropicPhaseVelocity Amp_1psi Deg_1psi Amp_2psi Deg_2psi
+
+60s_iso_ani_v1_scale_0.ani
+# original 60s azimuth dependent Rayleigh Wave phase velocity measurements
+Longitude Latitude NumberOfAzimuthalMeasurements
+Backzimuth PhaseVelocity Uncertainty

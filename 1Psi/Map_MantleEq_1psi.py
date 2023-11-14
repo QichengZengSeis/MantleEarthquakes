@@ -407,5 +407,5 @@ ax2.set_ylim([3.7,3.95])
 # ax2.grid()
 
 TRANSPARENT=False
-plt.savefig(fdir+'/US_1psi_Eqs.png',transparent=TRANSPARENT,dpi=300)
-plt.savefig(fdir+'/US_1psi_Eqs.pdf',transparent=TRANSPARENT)
+# plt.savefig(fdir+'/US_1psi_Eqs.png',transparent=TRANSPARENT,dpi=300)
+# plt.savefig(fdir+'/US_1psi_Eqs.pdf',transparent=TRANSPARENT)
