@@ -235,177 +235,187 @@ MCR_lat.append(tmp_lat)
 # dir_Vph='/uufs/chpc.utah.edu/common/home/u1318104/Research/NearFieldXcorr/TOMO_BARMIN_ET_AL/30.0_iso/400_70/'
 # Lons,Lats,Vphs=np.loadtxt(dir_Vph+'USArr-iso_400_70_30.0.1',unpack=True)
 
-dir_Vph=fdir+'/Data_1psi/'
-# Lons,Lats,Vphs=np.loadtxt(dir_Vph+'60s_iso_ani_v1_scale_1.iso',unpack=True,usecols=(0,1,2))
-Lons,Lats,Vphs,A1,Psi1=np.loadtxt(dir_Vph+'USArr_1psi_0.txt',unpack=True,usecols=(0,1,2,3,4))
-
-SubN=3 #Subsample ratio of 1psi arrows
-Cri1=A1>0.02#np.where(A1>0.02)#0.0001
-Cri2=~np.array(np.round((Lons-np.min(Lons))/0.2)%SubN,dtype=bool)
-#US
-Cri3=~np.array(np.round((Lats-np.min(Lats))/0.2)%SubN,dtype=bool)
-#AK
-# Cri3=~np.array(np.round((Lats-np.min(Lats))/0.1)%SubN,dtype=bool)
-
-CriS=np.logical_and.reduce((Cri1,Cri2,Cri3))
-# CriS=Cri1
-
-LonsC=Lons[CriS]
-LatsC=Lats[CriS]
-A1C=A1[CriS]
-Psi1C=Psi1[CriS]
-#%% Mesh for 2D plot
-# from PlotAll import tightgaussiansmooth
-import matplotlib 
-
-# Lats60km=LatsEMC[DepsEMC==60]
-# Lons60km=LonsEMC[DepsEMC==60]
-# Vs60km=VsEMC[DepsEMC==60]
-
-Lon1=np.unique(Lons);Lon1.sort()
-Lat1=np.unique(Lats);Lat1.sort()
-DATA=np.zeros((len(Lat1),len(Lon1)))
-# if scale==[]:
-#     scale=[min(data),max(data)]
+Pers=[24,30,40,50,60,70,80,90,100]
+# per=60
+for per in Pers:
+    dir_Vph=fdir+'/Data_1psi/'
+    # Lons,Lats,Vphs=np.loadtxt(dir_Vph+'60s_iso_ani_v1_scale_1.iso',unpack=True,usecols=(0,1,2))
+    Lons,Lats,Vphs,A1,Psi1=np.loadtxt(dir_Vph+'USArr_%ds_1psi_0.txt'%per,unpack=True,usecols=(0,1,2,3,4))
+        
+    # dir_Vph=fdir+'/Data_1psi/'
+    # # Lons,Lats,Vphs=np.loadtxt(dir_Vph+'60s_iso_ani_v1_scale_1.iso',unpack=True,usecols=(0,1,2))
+    # Lons,Lats,Vphs,A1,Psi1=np.loadtxt(dir_Vph+'USArr_1psi_0.txt',unpack=True,usecols=(0,1,2,3,4))
     
-for k in range(len(Vphs)):
-    iLon=np.where(Lon1==Lons[k])
-    iLat=np.where(Lat1==Lats[k])
-    # DATA[iLat,iLon]=Vphs[k]
-    DATA[iLat,iLon]=A1[k]
+    SubN=3 #Subsample ratio of 1psi arrows
+    Cri1=A1>0.02#np.where(A1>0.02)#0.0001
+    Cri2=~np.array(np.round((Lons-np.min(Lons))/0.2)%SubN,dtype=bool)
+    #US
+    Cri3=~np.array(np.round((Lats-np.min(Lats))/0.2)%SubN,dtype=bool)
+    #AK
+    # Cri3=~np.array(np.round((Lats-np.min(Lats))/0.1)%SubN,dtype=bool)
     
-DATA=np.ma.array(DATA,mask=~np.array(DATA,dtype=bool))
-
-#%% Plotting setting
-
-ftname=[f.name for f in matplotlib.font_manager.fontManager.afmlist]
-import os
-from matplotlib import font_manager
-import sys
-# sys.path.append()
-# sys.path.insert(0,'/uufs/chpc.utah.edu/common/home/u1318104/Research/1Psi')
-# sys.path=list(np.unique(np.array(sys.path)))
-# sys.path
-import test_obs_1psi as to1
-
-
-plt.rcParams.update({
-    "text.usetex": True,
-    "font.family": 'Times New Roman',
-    "font.size": 11,
-    "figure.autolayout": True}) #'axes.linewidth': 0.8
-#%%
-
-#WUS
-# lonticks=np.arange(xmin,xmax,5)
-# latticks=np.arange(ymin,ymax,5)
-#AK
-#US
-# lonticks=np.arange(xmin,xmax,10)
-# latticks=np.arange(ymin,ymax,5)
-lonticks=np.arange(-120,-70+1,10)
-latticks=np.arange(25,50+1,5)
-
-# request=MapQuestOpenAerial() 
-# request=MapQuestOSM()
-# request=StamenTerrain()
-request=GoogleTiles(style='satellite')
-# GoogleTiles(style='satellite') #StamenTerrain()
-request.desired_tile_form='L'
-
-MarkerSize=12.5 #50
-# fig=plt.figure(figsize=(12, 8)) #, facecolor="none"
-
-
-ProjectCCRS=ccrs.PlateCarree()#ccrs.LambertConformal()
-fig, ax0=plt.subplots(figsize=(8.5, 6),subplot_kw=dict(projection=request.crs)) #,subplot_kw=dict(projection=request.crs)#12 8
-ax0.set_facecolor('gainsboro')
-## Reset Zoom level ###
-# xmine=-112.5; xmaxe=-111.6; ymine=40.4; ymaxe=40.9
-xmine=xmin; xmaxe=xmax; ymine=ymin; ymaxe=ymax
-
-ax0.cla()
-ax0.set_extent([xmine,xmaxe,ymine,ymaxe], crs=ProjectCCRS)
-# ax0.add_image(request,4,cmap='terrain') #,cmap='gray'
-# ax0.add_image(request,4,cmap='gray') #,cmap='gray'
-
-# Tick labels etc
-ax0.set_xticks(lonticks, crs=ProjectCCRS) #, crs=ProjectCCRS
-ax0.set_yticks(latticks, crs=ProjectCCRS) #, crs=ProjectCCRS
-lon_formatter = LongitudeFormatter(number_format='.1f', degree_symbol='')  # ,zero_direction_label=True)
-lat_formatter = LatitudeFormatter(number_format='.1f', degree_symbol='')
-ax0.xaxis.set_major_formatter(lon_formatter)
-ax0.yaxis.set_major_formatter(lat_formatter)
-ax0.xlabel_style = {'size': 11, 'color': 'gray'}
-ax0.ylabel_style = {'size': 11, 'color': 'gray'}  # 'weight':'bold'
-
-#plot faults...
-for ii in np.arange(len(faultslon)):
-    ax0.plot(faultslon[ii],faultslat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
-for ii in np.arange(len(rift_lon)):
-    if ii !=0:
-        continue
-    ax0.plot(rift_lon[ii],rift_lat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
-for ii in np.arange(len(BD_lon)):
-    ax0.plot(BD_lon[ii],BD_lat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
-# for ii in np.arange(len(GF_lon)):
-#     ax0.plot(GF_lon[ii],GF_lat[ii],linewidth=2,color='r',zorder=2,transform=ccrs.Geodetic()) #transform=ccrs.Geodetic() #linewidth=2.
-
-# for ii in np.arange(len(PP_lon)):
-#     ax0.plot(PP_lon[ii],PP_lat[ii],linewidth=2,color='r',zorder=2,transform=ccrs.Geodetic()) #transform=ccrs.Geodetic() #linewidth=2.
-
-
-im=ax0.contourf(Lon1,Lat1,DATA*100,np.linspace(0,6,7),cmap=cmnew1,extend='both',zorder=1,alpha=1,transform=ccrs.PlateCarree())    
-fig.colorbar(im,orientation='horizontal',ticks=np.linspace(0,6,7),pad=0.06,fraction=0.046,shrink=0.5,format='%.0f',label='1psi (\%)')
-
-# ax0.add_feature(cfeature.STATES.with_scale('1m'),linewidth=0.5) #.with_scale('110m')
-ax0.add_feature(cfeature.LAKES)
-ax0.add_feature(cfeature.BORDERS)
-ax0.add_feature(cfeature.STATES.with_scale('50m'),linewidth=0.3)
-ax0.add_feature(cfeature.LAND)
-ax0.add_feature(cfeature.OCEAN)
-###############events>45km###############
-for icat in range(len(cat1)):
-    # ax0.plot(cat1[icat,0],cat1[icat,1],'.',MarkerSize=catMS[icat],color='gray',transform=ccrs.PlateCarree())
-    ax0.scatter(cat1[icat,0],cat1[icat,1],s=catMS[icat]*2,color='gray',edgecolor='k',transform=ccrs.PlateCarree())
-lonSRPtmp0=-112.826942
-latSRPtmp0=43.384350
-lonSRPtmp1=-114.461650
-latSRPtmp1=45.427743
-
-lonSRP=(lonSRPtmp0+lonSRPtmp1)/2
-latSRP=(latSRPtmp0+latSRPtmp1)/2
-# lonSRP=(lonSRPtmp0*2/3+lonSRPtmp1*1/3)
-# latSRP=(latSRPtmp0*2/3+latSRPtmp1*1/3)
-
-# ax0.scatter(lonSRPtmp0,latSRPtmp0,s=50,color='k',marker='^',zorder=3,transform=ProjectCCRS)
-# ax0.scatter(lonSRPtmp1,latSRPtmp1,s=50,color='b',marker='^',zorder=3,transform=ProjectCCRS)
-# ax0.scatter(lonSRP,latSRP,s=50,color='g',marker='o',zorder=3,transform=ProjectCCRS)
-
-##################################### Inset ####################
-left,bottom, width, height=[0.735,0.22,0.22,0.22]
-
-ax2=fig.add_axes([left,bottom,width,height])
-
-ax2.plot(to1.aa1,to1.C_a1,color='g',label='1-psi %.4f \n2-psi %.4f'%(to1.A1,to1.A2),zorder=0)
-ax2.errorbar(to1.azi1,to1.vel1,yerr=to1.un_vel1,fmt='.',color='r',capsize=2,elinewidth=1,ms=4)
-ax2.text(0,3.89,'1-psi 3.0\%\n 2-psi 0.1\%')
-
-# ax2.legend()
-ax2.set_xlabel('Azimuth (degree)')
-ax2.set_ylabel('Phase Velocity (km/s)')
-
-ax2.yaxis.tick_right()
-ax2.yaxis.set_label_position('right')
-ax2.tick_params(axis='y',direction='in',pad=-17)
-ax2.tick_params(axis='x',direction='in',pad=-12)
-
-# ax2.set_xlim([-100,370])
-ax2.set_xticks([0,100,200,300])
-ax2.set_yticks([3.8,3.9])
-ax2.set_ylim([3.7,3.95])
-# ax2.grid()
-
-TRANSPARENT=False
-# plt.savefig(fdir+'/US_1psi_Eqs.png',transparent=TRANSPARENT,dpi=300)
-# plt.savefig(fdir+'/US_1psi_Eqs.pdf',transparent=TRANSPARENT)
+    CriS=np.logical_and.reduce((Cri1,Cri2,Cri3))
+    # CriS=Cri1
+    
+    LonsC=Lons[CriS]
+    LatsC=Lats[CriS]
+    A1C=A1[CriS]
+    Psi1C=Psi1[CriS]
+    #%% Mesh for 2D plot
+    # from PlotAll import tightgaussiansmooth
+    import matplotlib 
+    
+    # Lats60km=LatsEMC[DepsEMC==60]
+    # Lons60km=LonsEMC[DepsEMC==60]
+    # Vs60km=VsEMC[DepsEMC==60]
+    
+    Lon1=np.unique(Lons);Lon1.sort()
+    Lat1=np.unique(Lats);Lat1.sort()
+    DATA=np.zeros((len(Lat1),len(Lon1)))
+    # if scale==[]:
+    #     scale=[min(data),max(data)]
+        
+    for k in range(len(Vphs)):
+        iLon=np.where(Lon1==Lons[k])
+        iLat=np.where(Lat1==Lats[k])
+        # DATA[iLat,iLon]=Vphs[k]
+        DATA[iLat,iLon]=A1[k]
+        
+    DATA=np.ma.array(DATA,mask=~np.array(DATA,dtype=bool))
+    
+    #%% Plotting setting
+    
+    ftname=[f.name for f in matplotlib.font_manager.fontManager.afmlist]
+    import os
+    from matplotlib import font_manager
+    import sys
+    # sys.path.append()
+    # sys.path.insert(0,'/uufs/chpc.utah.edu/common/home/u1318104/Research/1Psi')
+    # sys.path=list(np.unique(np.array(sys.path)))
+    # sys.path
+    import test_obs_1psi as to1
+    
+    
+    plt.rcParams.update({
+        "text.usetex": True,
+        "font.family": 'Times New Roman',
+        "font.size": 11,
+        "figure.autolayout": True}) #'axes.linewidth': 0.8
+    #%%
+    
+    #WUS
+    # lonticks=np.arange(xmin,xmax,5)
+    # latticks=np.arange(ymin,ymax,5)
+    #AK
+    #US
+    # lonticks=np.arange(xmin,xmax,10)
+    # latticks=np.arange(ymin,ymax,5)
+    lonticks=np.arange(-120,-70+1,10)
+    latticks=np.arange(25,50+1,5)
+    
+    # request=MapQuestOpenAerial() 
+    # request=MapQuestOSM()
+    # request=StamenTerrain()
+    request=GoogleTiles(style='satellite')
+    # GoogleTiles(style='satellite') #StamenTerrain()
+    request.desired_tile_form='L'
+    
+    MarkerSize=12.5 #50
+    # fig=plt.figure(figsize=(12, 8)) #, facecolor="none"
+    
+    
+    ProjectCCRS=ccrs.PlateCarree()#ccrs.LambertConformal()
+    fig, ax0=plt.subplots(figsize=(8.5, 6),subplot_kw=dict(projection=request.crs)) #,subplot_kw=dict(projection=request.crs)#12 8
+    ax0.set_facecolor('gainsboro')
+    ## Reset Zoom level ###
+    # xmine=-112.5; xmaxe=-111.6; ymine=40.4; ymaxe=40.9
+    xmine=xmin; xmaxe=xmax; ymine=ymin; ymaxe=ymax
+    
+    ax0.cla()
+    ax0.set_extent([xmine,xmaxe,ymine,ymaxe], crs=ProjectCCRS)
+    # ax0.add_image(request,4,cmap='terrain') #,cmap='gray'
+    # ax0.add_image(request,4,cmap='gray') #,cmap='gray'
+    
+    # Tick labels etc
+    ax0.set_xticks(lonticks, crs=ProjectCCRS) #, crs=ProjectCCRS
+    ax0.set_yticks(latticks, crs=ProjectCCRS) #, crs=ProjectCCRS
+    lon_formatter = LongitudeFormatter(number_format='.1f', degree_symbol='')  # ,zero_direction_label=True)
+    lat_formatter = LatitudeFormatter(number_format='.1f', degree_symbol='')
+    ax0.xaxis.set_major_formatter(lon_formatter)
+    ax0.yaxis.set_major_formatter(lat_formatter)
+    ax0.xlabel_style = {'size': 11, 'color': 'gray'}
+    ax0.ylabel_style = {'size': 11, 'color': 'gray'}  # 'weight':'bold'
+    
+    #plot faults...
+    for ii in np.arange(len(faultslon)):
+        ax0.plot(faultslon[ii],faultslat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
+    for ii in np.arange(len(rift_lon)):
+        if ii !=0:
+            continue
+        ax0.plot(rift_lon[ii],rift_lat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
+    for ii in np.arange(len(BD_lon)):
+        ax0.plot(BD_lon[ii],BD_lat[ii],linewidth=2,color='r',zorder=2,transform=ProjectCCRS) #transform=ccrs.Geodetic() #linewidth=2.
+    # for ii in np.arange(len(GF_lon)):
+    #     ax0.plot(GF_lon[ii],GF_lat[ii],linewidth=2,color='r',zorder=2,transform=ccrs.Geodetic()) #transform=ccrs.Geodetic() #linewidth=2.
+    
+    # for ii in np.arange(len(PP_lon)):
+    #     ax0.plot(PP_lon[ii],PP_lat[ii],linewidth=2,color='r',zorder=2,transform=ccrs.Geodetic()) #transform=ccrs.Geodetic() #linewidth=2.
+    
+    
+    im=ax0.contourf(Lon1,Lat1,DATA*100,np.linspace(0,6,7),cmap=cmnew1,extend='both',zorder=1,alpha=1,transform=ccrs.PlateCarree())    
+    fig.colorbar(im,orientation='horizontal',ticks=np.linspace(0,6,7),pad=0.06,fraction=0.046,shrink=0.5,format='%.0f',label='1psi (\%)')
+    
+    # ax0.add_feature(cfeature.STATES.with_scale('1m'),linewidth=0.5) #.with_scale('110m')
+    ax0.add_feature(cfeature.LAKES)
+    ax0.add_feature(cfeature.BORDERS)
+    ax0.add_feature(cfeature.STATES.with_scale('50m'),linewidth=0.3)
+    ax0.add_feature(cfeature.LAND)
+    ax0.add_feature(cfeature.OCEAN)
+    ###############events>45km###############
+    for icat in range(len(cat1)):
+        # ax0.plot(cat1[icat,0],cat1[icat,1],'.',MarkerSize=catMS[icat],color='gray',transform=ccrs.PlateCarree())
+        ax0.scatter(cat1[icat,0],cat1[icat,1],s=catMS[icat]*2,color='gray',edgecolor='k',transform=ccrs.PlateCarree())
+    lonSRPtmp0=-112.826942
+    latSRPtmp0=43.384350
+    lonSRPtmp1=-114.461650
+    latSRPtmp1=45.427743
+    
+    lonSRP=(lonSRPtmp0+lonSRPtmp1)/2
+    latSRP=(latSRPtmp0+latSRPtmp1)/2
+    # lonSRP=(lonSRPtmp0*2/3+lonSRPtmp1*1/3)
+    # latSRP=(latSRPtmp0*2/3+latSRPtmp1*1/3)
+    
+    # ax0.scatter(lonSRPtmp0,latSRPtmp0,s=50,color='k',marker='^',zorder=3,transform=ProjectCCRS)
+    # ax0.scatter(lonSRPtmp1,latSRPtmp1,s=50,color='b',marker='^',zorder=3,transform=ProjectCCRS)
+    # ax0.scatter(lonSRP,latSRP,s=50,color='g',marker='o',zorder=3,transform=ProjectCCRS)
+    
+    ##################################### Inset ####################
+    # left,bottom, width, height=[0.735,0.22,0.22,0.22]
+    
+    # ax2=fig.add_axes([left,bottom,width,height])
+    
+    # ax2.plot(to1.aa1,to1.C_a1,color='g',label='1-psi %.4f \n2-psi %.4f'%(to1.A1,to1.A2),zorder=0)
+    # ax2.errorbar(to1.azi1,to1.vel1,yerr=to1.un_vel1,fmt='.',color='r',capsize=2,elinewidth=1,ms=4)
+    # ax2.text(0,3.89,'1-psi 3.0\%\n 2-psi 0.1\%')
+    
+    # # ax2.legend()
+    # ax2.set_xlabel('Azimuth (degree)')
+    # ax2.set_ylabel('Phase Velocity (km/s)')
+    
+    # ax2.yaxis.tick_right()
+    # ax2.yaxis.set_label_position('right')
+    # ax2.tick_params(axis='y',direction='in',pad=-17)
+    # ax2.tick_params(axis='x',direction='in',pad=-12)
+    
+    # # ax2.set_xlim([-100,370])
+    # ax2.set_xticks([0,100,200,300])
+    # ax2.set_yticks([3.8,3.9])
+    # ax2.set_ylim([3.7,3.95])
+    # ax2.grid()
+    
+    TRANSPARENT=False
+    plt.savefig(fdir+'/Figures/US_%ds_1psi_Eqs.png'%per,transparent=TRANSPARENT,dpi=300)
+    plt.savefig(fdir+'/Figures/US_%ds_1psi_Eqs.pdf'%per,transparent=TRANSPARENT)
+    
+    # plt.savefig(fdir+'/US_1psi_Eqs.png',transparent=TRANSPARENT,dpi=300)
+    # plt.savefig(fdir+'/US_1psi_Eqs.pdf',transparent=TRANSPARENT)

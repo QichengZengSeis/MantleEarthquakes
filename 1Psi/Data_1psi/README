@@ -1,5 +1,5 @@
-USArr_1psi_0.txt
-# Anisotropy Compilation
+USArr_Ts_1psi_0.txt (USArr_1psi_0.txt same as for 60s) 
+# Anisotropy Compilation for each period at T second
 Longitude Latitude IsotropicPhaseVelocity Amp_1psi Deg_1psi Amp_2psi Deg_2psi
 
 60s_iso_ani_v1_scale_0.ani
